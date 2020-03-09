@@ -43,6 +43,17 @@ int main()
 {
 
 	sbuf_init(&buffer,8);
+
+	sbuf_insert(&buffer, 5);
+
+	int i = 0;
+	while(i < 5){
+		printf("front: %d\n",buffer.front );
+		printf("buffer: %d\n",buffer.buf[i] );
+		printf("rear: %d\n",buffer.rear );
+		i++;
+	}
+
 	createProducerThreads(10, 10);
 	createConsumerThreads(10, 100);
 	exit(0);
@@ -51,16 +62,16 @@ int main()
 // Buffer Functions
 void sbuf_init(sbuf_t *sp, int n)
 {
-	printf("Line 1.\n");
-	sp->buf = (int*)malloc(n *  sizeof(int));
-	printf("Line 1.\n");
+	//printf("Line 1.\n");
+	sp->buf = (int*)calloc(n , sizeof(int));
+	//printf("Line 1.\n");
 	sp->n = n;
-	printf("sp->n:%d.\n", sp->n);
-	printf("Line 1.\n");
-	sp->front = sp->rear = 0; 	printf("Line 1.\n");
-	sem_init(&sp->mutex, 0, 1); printf("Line 1.\n");
-	sem_init(&sp->slots, 0, n); printf("Line 1.\n");
-	sem_init(&sp->items, 0, 0); printf("Line 1.\n");
+	// printf("sp->n:%d.\n", sp->n);
+	// printf("Line 1.\n");
+	sp->front = sp->rear = 0; 	//printf("Line 1.\n");
+	sem_init(&sp->mutex, 0, 1); //printf("Line 1.\n");
+	sem_init(&sp->slots, 0, n); //printf("Line 1.\n");
+	sem_init(&sp->items, 0, 0); //printf("Line 1.\n");
 }
 
 void sbuf_deinit(sbuf_t *sp)
@@ -72,7 +83,8 @@ void sbuf_insert(sbuf_t *sp, int item)
 {
 	sem_wait(&sp->slots);
 	sem_wait(&sp->mutex);
-	sp->buf[(++sp->rear)%(sp->n)] = item;
+	sp->buf[(sp->rear)%(sp->n)] = item;
+	sp->rear++;
 	sem_post(&sp->mutex);
 	sem_post(&sp->items);
 
@@ -83,7 +95,8 @@ int sbuf_remove(sbuf_t *sp)
 	int item;
 	sem_wait(&sp->items);
 	sem_wait(&sp->mutex);
-	item = sp->buf[(++sp->front)%(sp->n)];
+	item = sp->buf[(sp->front)%(sp->n)];
+	sp->front++;
 	sem_post(&sp->mutex);
 	sem_post(&sp->slots);
 	return item;
@@ -93,24 +106,24 @@ int sbuf_remove(sbuf_t *sp)
 
 void *producer(void *vargp) /* thread routine */
 {
-	printf("Inside Producer Function.\n");
+	//printf("Inside Producer Function.\n");
 	// pthread_detach(pthread_self());
 	// sem_wait(&mutex); 
 	int item_count = (*((Thread*)vargp)).item_count;
 	int self_id =    (*((Thread*)vargp)).self_id;
-	printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
+	//printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
 	// sem_post(&mutex); 
 	return NULL;	
 }
 
 void*consumer(void*amount)
 {
-	printf("Inside Consumer Function.\n");
+	//printf("Inside Consumer Function.\n");
 	pthread_detach(pthread_self());
 	// sem_wait(&mutex);
 	int item_count = (*((Thread*)amount)).item_count;
 	int self_id =    (*((Thread*)amount)).self_id;
-	printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
+	//printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
 	// sem_post(&mutex); 
 	return NULL;
 }

@@ -44,18 +44,9 @@ int main()
 
 	sbuf_init(&buffer,8);
 
-	sbuf_insert(&buffer, 5);
 
-	int i = 0;
-	while(i < 5){
-		printf("front: %d\n",buffer.front );
-		printf("buffer: %d\n",buffer.buf[i] );
-		printf("rear: %d\n",buffer.rear );
-		i++;
-	}
-
-	createProducerThreads(10, 10);
-	createConsumerThreads(10, 100);
+	createProducerThreads(4, 2);
+	createConsumerThreads(3, 4*2);
 
 	
 
@@ -112,6 +103,16 @@ void *producer(void *vargp) /* thread routine */
 	// sem_wait(&mutex); 
 	int item_count = (*((Thread*)vargp)).item_count;
 	int self_id =    (*((Thread*)vargp)).self_id;
+
+	int count = (self_id * item_count);
+	while(count <= (self_id + 1) * item_count - 1){
+		sbuf_insert (&buffer, count);
+		printf("producer_%d produced item %d \n",self_id, count);
+		count++;
+	}
+
+
+	
 	//printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
 	// sem_post(&mutex); 
 	return NULL;	
@@ -126,6 +127,14 @@ void*consumer(void*amount)
 	int self_id =    (*((Thread*)amount)).self_id;
 	//printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
 	// sem_post(&mutex); 
+	int count = 0;
+	while(count < item_count){
+		printf("consumer_%d consumed item %d \n", self_id , sbuf_remove (&buffer));
+		//sbuf_remove (&buffer);
+		
+		count++;
+	}
+
 	return NULL;
 }
 
@@ -143,7 +152,6 @@ void createProducerThreads(int amount, int item_count)
 		pthread_join(array[count], NULL);
 		count++;
 	}
-	pthread_join(array[9], NULL);
 }
 
 void createConsumerThreads(int amount, int item_count)
@@ -153,12 +161,12 @@ void createConsumerThreads(int amount, int item_count)
 	int count = 0;
 	while(count < amount)
 	{
-		threadArray[count].item_count = item_count;
+		threadArray[count].item_count = item_count/amount;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
 		pthread_create(&array[count],NULL,consumer,dummy);
 		pthread_join(array[count], NULL); // comment out to detach functions
 		count++;
 	}
-	pthread_join(array[9], NULL);
+	
 }

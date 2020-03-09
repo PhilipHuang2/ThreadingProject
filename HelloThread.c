@@ -38,11 +38,11 @@ void*consumer(void*amount);
 void createProducerThreads(int amount, int item_count);
 void createConsumerThreads(int amount, int item_count);
 
-sbuf_t *buffer;
+sbuf_t buffer;
 int main()
 {
 
-	sbuf_init(buffer,8);
+	sbuf_init(&buffer,8);
 	createProducerThreads(10, 10);
 	createConsumerThreads(10, 100);
 	exit(0);
@@ -55,6 +55,7 @@ void sbuf_init(sbuf_t *sp, int n)
 	sp->buf = (int*)malloc(n *  sizeof(int));
 	printf("Line 1.\n");
 	sp->n = n;
+	printf("sp->n:%d.\n", sp->n);
 	printf("Line 1.\n");
 	sp->front = sp->rear = 0; 	printf("Line 1.\n");
 	sem_init(&sp->mutex, 0, 1); printf("Line 1.\n");

@@ -56,22 +56,23 @@ int main()
 
 	createProducerThreads(10, 10);
 	createConsumerThreads(10, 100);
+
+	
+
 	exit(0);
 }
 
 // Buffer Functions
 void sbuf_init(sbuf_t *sp, int n)
 {
-	//printf("Line 1.\n");
-	sp->buf = (int*)calloc(n , sizeof(int));
-	//printf("Line 1.\n");
+
+	sp->buf = (int*)calloc(n, sizeof(int));
 	sp->n = n;
-	// printf("sp->n:%d.\n", sp->n);
-	// printf("Line 1.\n");
-	sp->front = sp->rear = 0; 	//printf("Line 1.\n");
-	sem_init(&sp->mutex, 0, 1); //printf("Line 1.\n");
-	sem_init(&sp->slots, 0, n); //printf("Line 1.\n");
-	sem_init(&sp->items, 0, 0); //printf("Line 1.\n");
+	sp->front = sp->rear = 0; 	
+	sem_init(&sp->mutex, 0, 1); 
+	sem_init(&sp->slots, 0, n);
+	sem_init(&sp->items, 0, 0); 
+
 }
 
 void sbuf_deinit(sbuf_t *sp)

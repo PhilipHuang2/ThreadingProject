@@ -89,14 +89,14 @@ int main(int argc, char ** argv)
 	createProducerThreads(p, i);
 	createConsumerThreads(c, p * i);
 	int count = 0;
-	while(count < 4)
+	while(count < p)
 	{
 		pthread_join(producerArray[count], NULL);
 		// printf("waiting for producer %d\n", count);
 		count++;
 	}
 	count = 0;
-	while(count < 3)
+	while(count < c)
 	{
 		pthread_join(consumerArray[count], NULL);
 		// printf("waiting for consumer %d\n", secondCount);

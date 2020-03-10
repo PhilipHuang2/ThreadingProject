@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -33,10 +34,13 @@ int sbuf_remove(sbuf_t *sp);
 // Thread Functions
 void*producer(void*vargp);
 void*consumer(void*amount);
+void*producerSleep(void*vargp);
+void*consumerSleep(void*amount);
+
 
 // Wrapper functions that creates groups of threads
-void createProducerThreads(int amount, int item_count);
-void createConsumerThreads(int amount, int item_count);
+void createProducerThreads(int amount, int item_count, int delay);
+void createConsumerThreads(int amount, int item_count, int delay);
 
 sbuf_t buffer;
 
@@ -48,7 +52,6 @@ pthread_t * consumerArray;
 int main(int argc, char ** argv)
 
 {
-
 	if (argc != 5){
 		printf("Invalid amount of arguments\n");
 		exit(0);
@@ -72,9 +75,9 @@ int main(int argc, char ** argv)
 	//p between 1-16
 
 	if ( between1to16(p) && i ){		//checks p and i
-		printf("p:%d , between: %d \n", p, between1to16(p) );
+		// printf("p:%d , between: %d \n", p, between1to16(p) );
 		if ( between1to16(c) && (c < c*i) ){		//checks c and c < p*i
-			printf("arguments are correct\n" );
+			// printf("arguments are correct\n" );
 		}
 	 }
 	//c between 1-16 and less than the total items produced (c < p*i)
@@ -86,22 +89,22 @@ int main(int argc, char ** argv)
 
 
 	sbuf_init(&buffer,8);
-	printf ("test \n");
-	createProducerThreads(p, i);
-	createConsumerThreads(c, p * i);
-	printf ("test \n");
+	// printf ("test \n");
+	createProducerThreads(p, i, d);
+	createConsumerThreads(c, p * i, d);
+	// printf ("test \n");
 	int count = 0;
 	while(count < p)
 	{
 		pthread_join(producerArray[count], NULL);
-		// printf("waiting for producer %d\n", count);
+		//printf("waiting for producer %d\n", count);
 		count++;
 	}
 	count = 0;
 	while(count < c)
 	{
 		pthread_join(consumerArray[count], NULL);
-		// printf("waiting for consumer %d\n", secondCount);
+		// printf("waiting for consumer %d\n", count);
 		count++;
 	}
 
@@ -181,14 +184,41 @@ void*consumer(void*amount)
 	int count = 0;
 	while(count < item_count){
 		printf("consumer_%d consumed item %d \n", self_id , sbuf_remove (&buffer));
-		count++;
+		count++;	
 	}
 	return NULL;
 }
 
-void createProducerThreads(int amount, int item_count)
+void*producerSleep(void*vargp)
 {
-	printf("inside prod thread funct\n");
+	int item_count = (*((Thread*)vargp)).item_count;
+	int self_id =    (*((Thread*)vargp)).self_id;
+	int count = (self_id * item_count);
+	while(count <= (self_id + 1) * item_count - 1){
+		sbuf_insert (&buffer, count);
+		printf("producer_%d produced item %d \n",self_id, count);
+		count++;
+		usleep(500000);
+	}
+	return NULL;	
+}
+
+void*consumerSleep(void*amount)
+{
+	int item_count = (*((Thread*)amount)).item_count;
+	int self_id =    (*((Thread*)amount)).self_id;
+	int count = 0;
+	while(count < item_count){
+		printf("consumer_%d consumed item %d \n", self_id , sbuf_remove (&buffer));
+		count++;
+		usleep(500000);
+	}
+	return NULL;
+}
+
+void createProducerThreads(int amount, int item_count, int delay)
+{
+	// printf("inside prod thread funct\n");
 	producerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;
@@ -197,13 +227,17 @@ void createProducerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
+		if(delay == 0)
+			pthread_create(&producerArray[count], NULL, producerSleep, dummy);
+		else	
+			pthread_create(&producerArray[count], NULL, producer, dummy);
 		count++;
 	}
 }
 
-void createConsumerThreads(int amount, int item_count)
+void createConsumerThreads(int amount, int item_count, int delay)
 {
-	printf("inside consumer thread funct\n");
+	// printf("inside consumer thread funct\n");
 	consumerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;
@@ -212,6 +246,10 @@ void createConsumerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count/amount;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
+		if(delay == 0)
+			pthread_create(&consumerArray[count], NULL, consumer, dummy);
+		else
+			pthread_create(&consumerArray[count], NULL, consumerSleep, dummy);
 		count++;
 	}
 }

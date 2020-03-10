@@ -86,8 +86,10 @@ int main(int argc, char ** argv)
 
 
 	sbuf_init(&buffer,8);
+	printf ("test \n");
 	createProducerThreads(p, i);
 	createConsumerThreads(c, p * i);
+	printf ("test \n");
 	int count = 0;
 	while(count < 4)
 	{
@@ -195,6 +197,7 @@ void*consumer(void*amount)
 
 void createProducerThreads(int amount, int item_count)
 {
+	printf("inside prod thread funct\n");
 	producerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;
@@ -210,6 +213,7 @@ void createProducerThreads(int amount, int item_count)
 
 void createConsumerThreads(int amount, int item_count)
 {
+	printf("inside consumer thread funct\n");
 	consumerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;

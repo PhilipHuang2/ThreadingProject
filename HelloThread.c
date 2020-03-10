@@ -45,7 +45,7 @@ sbuf_t buffer;
 pthread_t * producerArray;
 pthread_t * consumerArray;
 
-int main(int argc, int * argv)
+int main(int argc, char ** argv)
 
 {
 
@@ -59,6 +59,10 @@ int main(int argc, int * argv)
 	// 	c++;
 	// }
 
+	// int p = atoi(argv[1]);
+	// int c = atoi(argv[2]);
+	// int i = atoi(argv[3]);
+	// int d = atoi(argv[4]);
 	int p = atoi(argv[1]);
 	int c = atoi(argv[2]);
 	int i = atoi(argv[3]);

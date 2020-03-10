@@ -157,33 +157,24 @@ int sbuf_remove(sbuf_t *sp)
 
 void *producer(void *vargp) /* thread routine */
 {
-	//printf("Inside Producer Function.\n");
-	// pthread_detach(pthread_self());
-	// sem_wait(&mutex); 
 	int item_count = (*((Thread*)vargp)).item_count;
 	int self_id =    (*((Thread*)vargp)).self_id;
-
 	int count = (self_id * item_count);
 	while(count <= (self_id + 1) * item_count - 1){
 		sbuf_insert (&buffer, count);
 		printf("producer_%d produced item %d \n",self_id, count);
 		count++;
 	}
-	//printf("Self ID: %d, item_count: %d.\n", self_id, item_count);
-	// sem_post(&mutex); 
 	return NULL;	
 }
 
 void*consumer(void*amount)
 {
-	// sem_wait(&mutex);
 	int item_count = (*((Thread*)amount)).item_count;
 	int self_id =    (*((Thread*)amount)).self_id;
 	int count = 0;
 	while(count < item_count){
 		printf("consumer_%d consumed item %d \n", self_id , sbuf_remove (&buffer));
-		//sbuf_remove (&buffer);
-		
 		count++;
 	}
 	return NULL;
@@ -199,7 +190,6 @@ void createProducerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
-		// pthread_join(producerArray[count], NULL);
 		count++;
 	}
 }
@@ -214,7 +204,6 @@ void createConsumerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count/amount;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
-		// pthread_join(consumerArray[count], NULL); // comment out to detach functions
 		count++;
 	}
 }

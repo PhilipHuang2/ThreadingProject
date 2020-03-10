@@ -7,8 +7,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-sem_t mutex; 
-
 typedef struct {
 	int self_id;
 	int item_count;
@@ -39,33 +37,30 @@ void createProducerThreads(int amount, int item_count);
 void createConsumerThreads(int amount, int item_count);
 
 sbuf_t buffer;
+pthread_t * producerArray;
+pthread_t * consumerArray;
+
 int main()
 {
 
 	sbuf_init(&buffer,8);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// int i = 0;
-	// while( i < 8)
-	// {
-	// 	printf("%d: [%d].\n", i, buffer.buf[i]);
-	// 	i++;
-	// }
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// sbuf_insert(&buffer, 10);
-	// i = 0;
-	// while( i < 8)
-	// {
-	// 	printf("%d: [%d].\n", i, buffer.buf[i]);
-	// 	i++;
-	// }
-	//createProducerThreads(10, 10);
-	//createConsumerThreads(10, 100);
+	createProducerThreads(10, 10);
+	createConsumerThreads(10, 100);
+	int count = 0;
+	while(count < 10)
+	{
+		pthread_join(producerArray[count], NULL);
+		// printf("waiting for producer %d\n", count);
+		count++;
+	}
+	count = 0;
+	while(count < 10)
+	{
+		pthread_join(consumerArray[count], NULL);
+		// printf("waiting for consumer %d\n", secondCount);
+		count++;
+	}
+
 	sbuf_deinit(&buffer);
 	exit(0);
 }
@@ -126,7 +121,6 @@ void *producer(void *vargp) /* thread routine */
 void*consumer(void*amount)
 {
 	printf("Inside Consumer Function.\n");
-	pthread_detach(pthread_self());
 	// sem_wait(&mutex);
 	int item_count = (*((Thread*)amount)).item_count;
 	int self_id =    (*((Thread*)amount)).self_id;
@@ -137,7 +131,7 @@ void*consumer(void*amount)
 
 void createProducerThreads(int amount, int item_count)
 {
-	pthread_t * array = malloc(amount* sizeof(pthread_t));
+	producerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;
 	while(count < amount)
@@ -145,16 +139,15 @@ void createProducerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
-		pthread_create(&array[count],NULL,producer,dummy);
-		pthread_join(array[count], NULL);
+		pthread_create(&producerArray[count],NULL,producer,dummy);
+		// pthread_join(producerArray[count], NULL);
 		count++;
 	}
-	pthread_join(array[9], NULL);
 }
 
 void createConsumerThreads(int amount, int item_count)
 {
-	pthread_t * array = malloc(amount* sizeof(pthread_t));
+	consumerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));
 	int count = 0;
 	while(count < amount)
@@ -162,9 +155,8 @@ void createConsumerThreads(int amount, int item_count)
 		threadArray[count].item_count = item_count;
 		threadArray[count].self_id = count; 
 		void* dummy = &threadArray[count];
-		pthread_create(&array[count],NULL,consumer,dummy);
-		pthread_join(array[count], NULL); // comment out to detach functions
+		pthread_create(&consumerArray[count],NULL,consumer,dummy);
+		// pthread_join(consumerArray[count], NULL); // comment out to detach functions
 		count++;
 	}
-	pthread_join(array[9], NULL);
 }

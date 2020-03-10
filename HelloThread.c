@@ -41,15 +41,33 @@ void createProducerThreads(int amount, int item_count);
 void createConsumerThreads(int amount, int item_count);
 
 sbuf_t buffer;
-int main(int argc, int * argv)
+int main(int argc, char * argv[])
 {
 
-	//p between 1-16
-	if ( between1to16(argv[0]) && argv[2] ){		//checks p and i
-		if (between1to16(argv[1]) && (argv[1] < argv[0]*argv[2]) ){		//checks c and c < p*i
-
-		}
+	if (argc != 5){
+		printf("Invalid amount of arguments\n");
+		exit(0);
 	}
+	// int c = 0;
+	// while (c < argc){
+	// 	printf("arguments [%d]: %s \n",c, argv[c]);
+	// 	c++;
+	// }
+
+	int p = atoi(argv[1]);
+	int c = atoi(argv[2]);
+	int i = atoi(argv[3]);
+	int d = atoi(argv[4]);
+
+
+	//p between 1-16
+
+	if ( between1to16(p) && i ){		//checks p and i
+		printf("p:%d , between: %d \n", p, between1to16(p) );
+		if ( between1to16(c) && (c < c*i) ){		//checks c and c < p*i
+			printf("arguments are correct\n" );
+		}
+	 }
 	//c between 1-16 and less than the total items produced (c < p*i)
 
 	//i items produced by each producer
@@ -57,22 +75,22 @@ int main(int argc, int * argv)
 	//d selection of delay option. if 0, delay added to producer; if 1 delay added to consumers
 
 
-	sbuf_init(&buffer,8);
+	// sbuf_init(&buffer,8);
 
-	createProducerThreads(4, 2);
-	createConsumerThreads(3, 4*2);
-	while(1)
-	{}
+	// createProducerThreads(4, 2);
+	// createConsumerThreads(3, 4*2);
+	// while(1)
+	// {}
 	
 
 	exit(0);
 }
 
 int between1to16(int num){
-	if (num > 1 && num < 16){
+	if (num >= 1 && num <= 16){
 		return 1;
 	}
-	return -1;
+	return 0;
 }
 
 

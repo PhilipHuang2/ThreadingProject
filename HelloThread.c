@@ -201,6 +201,10 @@ void createProducerThreads(int amount, int item_count)
 		void* dummy = &threadArray[count];
 		// pthread_join(producerArray[count], NULL);
 		count++;
+	}
+}
+
+void createConsumerThreads(int amount, int item_count)
 {
 	consumerArray = malloc(amount* sizeof(pthread_t));
 	Thread * threadArray = malloc(amount * sizeof(Thread));

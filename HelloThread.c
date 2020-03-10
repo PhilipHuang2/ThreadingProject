@@ -82,8 +82,8 @@ int main(int argc, int * argv)
 
 
 	sbuf_init(&buffer,8);
-	createProducerThreads(4, 2);
-	createConsumerThreads(3, 4 * 2);
+	createProducerThreads(p, i);
+	createConsumerThreads(c, p * i);
 	int count = 0;
 	while(count < 4)
 	{
@@ -177,6 +177,8 @@ void *producer(void *vargp) /* thread routine */
 void*consumer(void*amount)
 {
 	// sem_wait(&mutex);
+	int item_count = (*((Thread*)amount)).item_count;
+	int self_id =    (*((Thread*)amount)).self_id;
 	int count = 0;
 	while(count < item_count){
 		printf("consumer_%d consumed item %d \n", self_id , sbuf_remove (&buffer));
